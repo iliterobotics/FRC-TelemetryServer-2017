@@ -1,0 +1,19 @@
+{
+  "name": "telemetery-server",
+  "version": "1.0.0",
+  "description": "ILITE 2017 Telemetry Server",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iliterobotics/FRC-TelemetryServer-2017.git"
+  },
+  "author": "Michael Kelly",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iliterobotics/FRC-TelemetryServer-2017/issues"
+  },
+  "homepage": "https://github.com/iliterobotics/FRC-TelemetryServer-2017#readme"
+}
