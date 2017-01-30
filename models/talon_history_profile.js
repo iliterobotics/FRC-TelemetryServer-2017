@@ -9,7 +9,7 @@ var talonProfile = new Schema({
 }, {_id: false});
 
 var TalonHistoryProfile = new Schema({
-  talon_profile_id: String,
+  talon_profile_id: Schema.Types.ObjectId,
   Start: {type:Date, default:Date.now},
   End: {type:Date, default:Date.now},
   TalonProfiles: [talonProfile]

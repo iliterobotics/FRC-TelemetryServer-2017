@@ -1,4 +1,5 @@
 module.exports = {
+  Name: String,
   CanID: Number,
   OutputType: String,
   Output: Number,
