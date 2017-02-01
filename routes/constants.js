@@ -1,11 +1,7 @@
 var ConstantValue = require('../models/constant_value');
 
 module.exports = function(app){
-  app.get('/test', function(req, res, err){
-    res.send('Hello, world!')
-  });
   app.get('/constant/:name', function(req, res, err){
-    if(err) console.error(err);
     ConstantValue.findOne({Name: req.params.name}, function(err, constant){
       if(err){
         res.send('INTERNAL ERROR');
@@ -20,7 +16,6 @@ module.exports = function(app){
     });
   });
   app.post('/constant/set', function(req, res, err){
-    if(err) return console.error(err);
     var constant = req.body;
     ConstantValue.find({Name : constant.Name}, function(err, constant){
       if(!constant){
@@ -35,19 +30,22 @@ module.exports = function(app){
     });
   });
   app.post('/constant/add', function(req, res, err){
-    if(err) return console.error(err);
     var name = req.body.Name;
     var value = req.body.Value;
-    console.log('adding new constant ...')
-    new ConstantValue({
+    var constant = new ConstantValue({
       Name: name,
-      value: value
-    }).save(function(err){
-      if(err){
-        res.send('Not saved successfully');
-        return console.error(err);
+      Value: value
+    })
+    ConstantValue.findOne({Name:constant.Name}, function(err, doc){
+      if(!doc){
+        constant.save(function(err){
+            console.log('New constant ' + constant.Name + ' added with value: ' + constant.Value);
+            res.send('Value added');
+        });
       }
-      res.send('added successfully');
+      else{
+        res.send('Value already exists');
+      }
     });
   });
 }

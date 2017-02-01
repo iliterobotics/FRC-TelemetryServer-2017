@@ -14,9 +14,11 @@ function listen(){
 
 module.exports = app;
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //MongoDB setup
+mongoose.Promise = require('bluebird');
 mongoose.connect('mongodb://localhost/telem-server');
 const db = mongoose.connection;
 db.on('error', console.log)
