@@ -4,15 +4,15 @@ var mongoose = require('mongoose'),
 var talon_model = require('./talon_model');
 
 var talonProfile = new Schema({
-  Time:{type:Date, default:Date.now},
-  Profile: talon_model
+  Time:{type:Date, default:Date.now, required:true},
+  Profile: {type:talon_model, requred:true}
 }, {_id: false});
 
 var TalonHistoryProfile = new Schema({
-  talon_profile_id: Schema.Types.ObjectId,
+  talon_profile_id: {type:Schema.Types.ObjectId, required:true},
   Start: {type:Date, default:Date.now},
   End: {type:Date, default:Date.now},
-  TalonProfiles: [talonProfile]
+  TalonProfiles: {type:[talonProfile], default:[]}
 });
 
 module.exports = mongoose.model('TalonHistoryProfile', TalonHistoryProfile, 'talon_history_profiles');

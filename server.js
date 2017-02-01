@@ -14,8 +14,7 @@ function listen(){
 
 module.exports = app;
 
-require('./routes')(app);
-app.use(bodyParser);
+app.use(bodyParser.json());
 
 //MongoDB setup
 mongoose.connect('mongodb://localhost/telem-server');
@@ -23,3 +22,5 @@ const db = mongoose.connection;
 db.on('error', console.log)
 db.on('disconnected', app.connect)
 db.once('open', listen);
+
+require('./routes')(app);
