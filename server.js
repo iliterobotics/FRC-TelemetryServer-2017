@@ -21,10 +21,10 @@ app.use(bodyParser.json());
 mongoose.Promise = require('bluebird');
 mongoose.connect('mongodb://127.0.0.1/telem-server');
 const db = mongoose.connection;
-db.on('error', (err) =>{
+db.on('error', function(err){
   console.log(err);
 });
-db.on('disconnected', (obj) => {
+db.on('disconnected', function(obj){
   console.log(obj);
 });
 db.once('open', listen);
