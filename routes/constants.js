@@ -4,7 +4,7 @@ module.exports = function(app){
   var http = require('http').Server(app);
   var io = require('socket.io')(http);
 
-  http.listen(1181, function(){
+  http.listen(81, function(){
     console.log('Constant update stream socket enabled');
   });
 
