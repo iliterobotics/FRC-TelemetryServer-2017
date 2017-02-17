@@ -1,5 +1,10 @@
 var ConstantValue = require('../models/constant_value');
 
+function emitConstant(){
+  console.log('New constants emitted');
+  io.emit('constants-updated', {});
+}
+
 module.exports = function(app){
   var http = require('http').Server(app);
   var io = require('socket.io')(http);
@@ -21,6 +26,7 @@ module.exports = function(app){
       }
       if(constant && constant.Value){
         res.send(constant.Value);
+        emitConstant();
       }
       else{
         res.send('VALUE NOT FOUND');
@@ -37,7 +43,6 @@ module.exports = function(app){
         ConstantValue.update({Name: constant.Name}, {$set:{Value: constant.Value}},function(err, doc){
           if(err) return console.error(err);
           res.send(doc);
-          io.emit('constants-updated', {});
         });
       }
     });
@@ -56,7 +61,7 @@ module.exports = function(app){
         constant.save(function(err){
             console.log('New constant ' + constant.Name + ' added with value: ' + constant.Value);
             res.send('Value added');
-            io.emit('constants-updated', {});
+            emitConstant();
         });
       }
       else{
@@ -69,7 +74,7 @@ module.exports = function(app){
     ConstantValue.remove({Name: req.params.name}, function(err){
       console.log('it was removed')
       res.send('done');
-      io.emit('constants-updated', {});
+      emitConstant();
     });
   });
 }
