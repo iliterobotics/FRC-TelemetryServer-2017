@@ -1,13 +1,14 @@
 var ConstantValue = require('../models/constant_value');
 
-function emitConstant(){
-  console.log('New constants emitted');
-  io.emit('constants-updated', {});
-}
-
 module.exports = function(app){
+
   var http = require('http').Server(app);
   var io = require('socket.io')(http);
+
+  var emitConstant = function(){
+    console.log('New constants emitted');
+    io.emit('constants-updated', {});
+  }
 
   http.listen(81, function(){
     console.log('Constant update stream socket enabled');
