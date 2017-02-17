@@ -19,10 +19,14 @@ app.use(bodyParser.json());
 
 //MongoDB setup
 mongoose.Promise = require('bluebird');
-mongoose.connect('mongodb://localhost/telem-server');
+mongoose.connect('mongodb://127.0.0.1/telem-server');
 const db = mongoose.connection;
-db.on('error', console.log)
-db.on('disconnected', app.connect)
+db.on('error', (err) =>{
+  console.log(err);
+});
+db.on('disconnected', (obj) => {
+  console.log(obj);
+});
 db.once('open', listen);
 
 require('./routes')(app);

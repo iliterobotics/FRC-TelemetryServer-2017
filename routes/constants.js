@@ -67,6 +67,7 @@ module.exports = function(app){
   app.get('/constant/remove/:name', function(req, res, err){
     console.log('Attempting to remove constant');
     ConstantValue.remove({Name: req.params.name}, function(err){
+      console.log('it was removed')
       res.send('done');
       io.emit('constants-updated', {});
     });
