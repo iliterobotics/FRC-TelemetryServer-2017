@@ -1,33 +1,19 @@
-var ConstantValue = require('../models/constant_value');
+var {LogValue, LogValueHistory} = require('../models/log_values');
 
 module.exports = function(app){
-
-  var http = require('http').Server(app);
-  var io = require('socket.io')(http);
-
-  var emitConstant = function(){
-    console.log('New constants emitted');
-    io.emit('constants-updated', {});
-  }
-
-  http.listen(81, function(){
-    console.log('Constant update stream socket enabled');
-  });
-
-  app.get('/constants', function(req, res, err){
-    ConstantValue.find({}, function(err, docs){
+  app.get('/logvals', function(req, res, err){
+    LogValue.find({}, function(err, docs){
       res.send(docs);
     });
   });
-  app.get('/constant/:name', function(req, res, err){
-    ConstantValue.findOne({Name: req.params.name}, function(err, constant){
+  app.get('/logvals/:name', function(req, res, err){
+    getValue(req.params.name, function(err, value){
       if(err){
-        res.send('INTERNAL ERROR');
+        res.send(err);
         return console.error(err);
       }
-      if(constant && constant.Value){
-        res.send(constant.Value);
-        emitConstant();
+      if(value){
+        res.send(value.Value);
       }
       else{
         res.send('VALUE NOT FOUND');
@@ -35,17 +21,15 @@ module.exports = function(app){
     });
   });
   app.post('/constant/set', function(req, res, err){
-    var constant = req.body;
-    ConstantValue.findOne({Name : constant.Name}, function(err, found){
-      if(!found){
-        res.send('CONSTANT DOES NOT EXIST');
+    var value = req.body;
+    doesValueExist(name, function(err, doesExist){
+      if(!doesExist){
+        addValue(name, handleError);
       }
-      else {
-        ConstantValue.update({Name: constant.Name}, {$set:{Value: constant.Value}},function(err, doc){
-          if(err) return console.error(err);
-          res.send(doc);
-        });
-      }
+      LogValue.update({Name: constant.Name}, {$set:{Value: constant.Value}},function(err, doc){
+        if(err) return console.error(err);
+        res.send(doc);
+      });
     });
   });
   app.get('/constant/:name/:value', function(req, res, err){
@@ -97,7 +81,7 @@ module.exports = function(app){
       Value: value,
       Description: description
     })
-    ConstantValue.findOne({Name:constant.Name}, function(err, doc){
+    LogValue.findOne({Name:constant.Name}, function(err, doc){
       if(!doc){
         constant.save(function(err){
             console.log('New constant ' + constant.Name + ' added with value: ' + constant.Value);
@@ -110,12 +94,53 @@ module.exports = function(app){
       }
     });
   });
-  app.get('/constant/remove/:name', function(req, res, err){
-    console.log('Attempting to remove constant');
-    ConstantValue.remove({Name: req.params.name}, function(err){
-      console.log('it was removed')
-      res.send('done');
-      emitConstant();
+}
+
+//Callback passes values of (error, document)
+function getValue(name, callback){
+  LogValue.findOne({Name:name}, callback);
+}
+
+//Callback passes values of (error, boolean)
+function doesValueExist(name, callback){
+  getValue(name, function(err, doc){
+    callback(err, !!doc);
+  });
+}
+
+
+function addValue(name, callback){
+  doesValueExist(name, function(err, doesExist){
+    if(!doesExist){
+      var newVal = new Value({Name:name});
+      newVal.save(function(err){
+        callback(err);
+      });
+    }
+  });
+}
+
+function updateValue(name, newval){
+  getValue(name, function(err, value){
+    if(!value){
+      addValue(name, handleError);
+    }
+    var logHist = new LogValueHistory({
+      Name: value.name,
+      Value: value.value,
+      Time: Date.getTime()
+    });
+    logHist.save(function(err){
+      LogValue.update({Name: constant.Name}, {$set:{Value: constant.Value}},function(err, doc){
+        if(err) return console.error(err);
+        res.send(doc);
+      });      
     });
   });
+}
+
+function handleError(err){
+  if(err){
+    return console.error(err);
+  }
 }
