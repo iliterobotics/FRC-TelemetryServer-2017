@@ -22,6 +22,7 @@ module.exports = function(app){
   });
   app.post('/logvals/set', function(req, res, err){
     var value = req.body;
+    console.log(value);
     updateValue(value.Name, value.Value);
     res.send('Success');
   });
@@ -59,12 +60,12 @@ function updateValue(name, newval){
       addValue(name, handleError);
     }
     var logHist = new LogValueHistory({
-      Name: value.Name,
+      Name: name,
       Value: newval,
       Time: Date.now()
     });
     logHist.save(function(err){
-      LogValue.update({Name: value.Name}, {$set:{Value: newval}},function(err, doc){
+      LogValue.update({Name: name}, {$set:{Value: newval}},function(err, doc){
         if(err) console.error(err);
       });
     });
