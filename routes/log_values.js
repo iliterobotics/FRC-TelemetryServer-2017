@@ -20,79 +20,10 @@ module.exports = function(app){
       }
     });
   });
-  app.post('/constant/set', function(req, res, err){
+  app.post('/logvals/set', function(req, res, err){
     var value = req.body;
-    doesValueExist(name, function(err, doesExist){
-      if(!doesExist){
-        addValue(name, handleError);
-      }
-      LogValue.update({Name: constant.Name}, {$set:{Value: constant.Value}},function(err, doc){
-        if(err) return console.error(err);
-        res.send(doc);
-      });
-    });
-  });
-  app.get('/constant/:name/:value', function(req, res, err){
-    console.log('Got constant update');
-    var constant = {
-      Name: req.params.name,
-      Value: req.params.value
-    };
-    ConstantValue.findOne({Name : constant.Name}, function(err, found){
-      if(!found){
-        res.send('CONSTANT DOES NOT EXIST');
-      }
-      else {
-        ConstantValue.update({Name: constant.Name}, {$set:{Value: constant.Value}},function(err, doc){
-          if(err) return console.error(err);
-          res.send(doc);
-        });
-      }
-    });
-  });
-  app.get('/constant/add/:name/:value', function(req, res, err){
-    var name = req.params.name;
-    var value = req.params.value;
-    var description = "";
-    var constant = new ConstantValue({
-      Name: name,
-      Value: value,
-      Description: description
-    })
-    ConstantValue.findOne({Name:constant.Name}, function(err, doc){
-      if(!doc){
-        constant.save(function(err){
-            console.log('New constant ' + constant.Name + ' added with value: ' + constant.Value);
-            res.send('Value added');
-            emitConstant();
-        });
-      }
-      else{
-        res.send('Value already exists');
-      }
-    });
-  });
-  app.post('/constant/add', function(req, res, err){
-    var name = req.body.Name;
-    var value = req.body.Value;
-    var description = req.body.Description;
-    var constant = new ConstantValue({
-      Name: name,
-      Value: value,
-      Description: description
-    })
-    LogValue.findOne({Name:constant.Name}, function(err, doc){
-      if(!doc){
-        constant.save(function(err){
-            console.log('New constant ' + constant.Name + ' added with value: ' + constant.Value);
-            res.send('Value added');
-            emitConstant();
-        });
-      }
-      else{
-        res.send('Value already exists');
-      }
-    });
+    updateValue(value.Name, value.Value);
+    res.send('Success');
   });
 }
 
@@ -112,7 +43,8 @@ function doesValueExist(name, callback){
 function addValue(name, callback){
   doesValueExist(name, function(err, doesExist){
     if(!doesExist){
-      var newVal = new Value({Name:name});
+      console.log('Does not exist, adding a new value');
+      var newVal = new LogValue({Name:name});
       newVal.save(function(err){
         callback(err);
       });
@@ -121,20 +53,20 @@ function addValue(name, callback){
 }
 
 function updateValue(name, newval){
+  console.log('Setting value: ' + name + ' to: ' + newval);
   getValue(name, function(err, value){
     if(!value){
       addValue(name, handleError);
     }
     var logHist = new LogValueHistory({
-      Name: value.name,
-      Value: value.value,
-      Time: Date.getTime()
+      Name: value.Name,
+      Value: newval,
+      Time: Date.now()
     });
     logHist.save(function(err){
-      LogValue.update({Name: constant.Name}, {$set:{Value: constant.Value}},function(err, doc){
-        if(err) return console.error(err);
-        res.send(doc);
-      });      
+      LogValue.update({Name: value.Name}, {$set:{Value: newval}},function(err, doc){
+        if(err) console.error(err);
+      });
     });
   });
 }
